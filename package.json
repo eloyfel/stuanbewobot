@@ -1,0 +1,15 @@
+{
+  "name": "stuanbewo-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot + web server for the STUAN BEWO social lottery",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

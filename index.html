@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="logo.png">
+<title>STUAN BEWO — Study. Post. Enter the pool.</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #0a0710;
+    --bg-alt: #120c1e;
+    --panel: #16101f;
+    --line: #2a2038;
+    --text: #e7e0f2;
+    --text-dim: #9686b3;
+    --magenta: #ff3d9a;
+    --cyan: #34f5c5;
+    --amber: #ffb84d;
+    --violet: #7c5cff;
+    --scanline-color: rgba(255,255,255,0.02);
+  }
+
+  body.light-mode{
+    --bg: #f5f2fb;
+    --bg-alt: #ece7f7;
+    --panel: #ffffff;
+    --line: #ddd5ef;
+    --text: #1a1329;
+    --text-dim: #6a5f88;
+    --scanline-color: rgba(20,10,40,0.025);
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  h1,h2,h3, .display{
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+  }
+
+  a{ color: inherit; text-decoration: none; }
+
+  .grid-overlay{
+    position: fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .scanline{
+    position: fixed; inset:0;
+    background: repeating-linear-gradient(
+      0deg, var(--scanline-color) 0px, var(--scanline-color) 1px,
+      transparent 1px, transparent 3px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  header{
+    position: relative; z-index: 2;
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 28px 6vw;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .logo{
+    font-size: 1.4rem;
+    display:flex; align-items:center; gap:12px;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .logo img{
+    width: 40px; height: 40px; border-radius: 50%;
+    box-shadow: 0 0 16px rgba(255,61,154,0.5);
+  }
+
+  nav a{
+    margin-left: 28px;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    transition: color 0.2s;
+  }
+  nav a:hover{ color: var(--cyan); }
+
+  #theme-toggle{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  #theme-toggle:hover{ border-color: var(--cyan); transform: translateY(-1px); }
+
+  main{ position:relative; z-index:2; }
+
+  .hero{
+    padding: 10vh 6vw 12vh;
+    max-width: 1300px;
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 60px;
+    align-items:center;
+  }
+  .hero-visual{ display:flex; justify-content:center; }
+  .hero-visual img{
+    width: 100%; max-width: 420px;
+    filter: drop-shadow(0 0 40px rgba(124,92,255,0.35));
+  }
+
+  .eyebrow{
+    color: var(--cyan);
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+
+  .hero h1{
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    max-width: 14ch;
+    position: relative;
+  }
+
+  .glitch-word{
+    position: relative;
+    display: inline-block;
+    color: var(--magenta);
+  }
+  .glitch-word::before, .glitch-word::after{
+    content: attr(data-text);
+    position: absolute; left:0; top:0;
+    width:100%; overflow:hidden;
+    opacity: 0.7;
+  }
+  .glitch-word::before{ color: var(--cyan); animation: glitch1 4.5s infinite linear; }
+  .glitch-word::after{ color: var(--violet); animation: glitch2 4.5s infinite linear; }
+  @keyframes glitch1{
+    0%, 92%, 100%{ clip-path: inset(0 0 0 0); transform: translate(0,0); opacity:0; }
+    93%{ clip-path: inset(20% 0 40% 0); transform: translate(-3px,0); opacity:0.8; }
+    95%{ clip-path: inset(60% 0 10% 0); transform: translate(3px,0); opacity:0.8; }
+    97%{ opacity:0; }
+  }
+  @keyframes glitch2{
+    0%, 90%, 100%{ clip-path: inset(0 0 0 0); transform: translate(0,0); opacity:0; }
+    91%{ clip-path: inset(10% 0 70% 0); transform: translate(3px,0); opacity:0.7; }
+    94%{ clip-path: inset(50% 0 20% 0); transform: translate(-2px,0); opacity:0.7; }
+    96%{ opacity:0; }
+  }
+
+  .hero p{ color: var(--text-dim); font-size: 1.1rem; max-width: 52ch; margin-top: 24px; }
+
+  .prompt-box{
+    margin-top: 28px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--magenta);
+    padding: 18px 22px;
+    max-width: 52ch;
+  }
+  .prompt-box .prompt-label{ color: var(--text-dim); font-size: 0.78rem; margin-bottom: 8px; }
+  .prompt-box .prompt-text{ font-family:'Rajdhani', sans-serif; font-weight:600; font-size: 1.1rem; color: var(--text); }
+  .prompt-box .tags{ margin-top: 10px; display:flex; gap: 10px; flex-wrap:wrap; }
+  .tag{
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:0.95rem;
+    color: var(--bg); background: var(--cyan); padding: 3px 10px; border-radius: 2px;
+  }
+  .tag.alt{ background: var(--magenta); }
+
+
+  section{ padding: 10vh 6vw; border-top: 1px solid var(--line); }
+
+  .section-head{
+    display:flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 56px; flex-wrap: wrap; gap: 16px;
+  }
+  .section-head h2{ font-size: clamp(1.8rem, 4vw, 2.6rem); }
+  .section-head .index{ color: var(--text-dim); font-size: 0.9rem; }
+
+  .steps{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .step{ background: var(--bg); padding: 36px 28px; }
+  .step .num{
+    color: var(--magenta); font-family: 'Rajdhani', sans-serif;
+    font-size: 2.2rem; font-weight: 700; margin-bottom: 18px; display:block;
+  }
+  .step h3{ font-size: 1.3rem; margin-bottom: 10px; }
+  .step p{ color: var(--text-dim); font-size: 0.98rem; }
+  .step .tags{ margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+
+  .pool-section{ background: var(--bg-alt); }
+  .pool-layout{ display:grid; grid-template-columns: 1fr 1.2fr; gap: 60px; }
+  .pool-copy p{ color: var(--text-dim); margin-bottom: 20px; }
+  .pool-copy .stat{ margin-top: 32px; display: flex; gap: 40px; flex-wrap: wrap; }
+  .stat-block .value{ font-family:'Rajdhani', sans-serif; font-weight:700; font-size: 2.2rem; color: var(--cyan); }
+  .stat-block .label{ color: var(--text-dim); font-size: 0.85rem; }
+
+  .payout-bars{ display:flex; flex-direction: column; gap: 14px; }
+  .bar-row{ display:grid; grid-template-columns: 60px 1fr 60px; align-items:center; gap: 14px; }
+  .bar-row .rank{ color: var(--text-dim); font-size: 0.9rem; }
+  .bar-track{ height: 28px; background: var(--panel); border: 1px solid var(--line); position: relative; overflow:hidden; }
+  .bar-fill{ height:100%; background: linear-gradient(90deg, var(--violet), var(--magenta)); }
+  .bar-row .pct{ text-align:right; font-family:'Rajdhani',sans-serif; font-weight:600; color: var(--amber); }
+  .pool-note{ margin-top: 20px; font-size: 0.85rem; color: var(--text-dim); border-left: 2px solid var(--cyan); padding-left: 14px; }
+
+  .litvm-section{ display:grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items:center; }
+  .litvm-copy p{ color: var(--text-dim); margin-bottom: 16px; }
+  .litvm-panel{ background: var(--panel); border:1px solid var(--line); padding: 32px; }
+  .litvm-panel .row{ display:flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+  .litvm-panel .row:last-child{ border-bottom:none; }
+  .litvm-panel .row span:last-child{ color: var(--cyan); }
+
+  .partners-grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px; background: var(--line); border: 1px solid var(--line);
+  }
+  .partner-slot{
+    background: var(--bg); padding: 32px 20px; text-align:center;
+    color: var(--text-dim); font-family:'Rajdhani',sans-serif; font-weight:600;
+    font-size: 1.05rem; display:flex; align-items:center; justify-content:center;
+    min-height: 90px;
+  }
+  .partner-slot.open{ border: 1px dashed var(--line); color: var(--text-dim); font-weight: 400; font-size: 0.9rem; }
+
+  .participants-panel{
+    background: var(--panel); border: 1px solid var(--line);
+  }
+  .participants-head{
+    display:grid; grid-template-columns: 50px 1fr 160px;
+    padding: 14px 24px; color: var(--text-dim); font-size: 0.8rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .participant-row{
+    display:grid; grid-template-columns: 50px 1fr 160px;
+    padding: 16px 24px; border-bottom: 1px solid var(--line);
+    align-items:center; font-size: 0.95rem;
+  }
+  .participant-row:last-child{ border-bottom:none; }
+  .participant-row .handle{ color: var(--cyan); }
+  .participant-row .target{ color: var(--text-dim); }
+  .status-pill{
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size: 0.8rem;
+    padding: 3px 10px; border-radius: 2px; text-align:center;
+    background: rgba(52,245,197,0.12); color: var(--cyan); width: fit-content;
+  }
+  .participants-empty{ padding: 40px 24px; text-align:center; color: var(--text-dim); font-size: 0.95rem; }
+
+  .register-section{ max-width: 640px; margin: 0 auto; text-align:center; }
+  .register-section h2{ font-size: clamp(1.9rem, 5vw, 2.6rem); margin-bottom: 16px; }
+  .register-section > p{ color: var(--text-dim); margin-bottom: 44px; }
+
+  .register-panel{ background: var(--panel); border: 1px solid var(--line); padding: 40px; text-align: left; }
+  .field{ margin-bottom: 20px; }
+  .field label{ display:block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; }
+  .field input{
+    width:100%; background: var(--bg); border:1px solid var(--line);
+    color: var(--text); padding: 12px 14px; font-family:'Space Grotesk',sans-serif;
+    font-size: 0.95rem; border-radius: 2px;
+  }
+  .field input:focus{ outline: none; border-color: var(--cyan); }
+
+  .telegram-btn{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+    background: #229ED9; color:#fff; padding: 13px; border-radius: 2px;
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:1rem;
+    margin-bottom: 20px; cursor:pointer; border: none;
+  }
+  .register-note{ font-size: 0.82rem; color: var(--text-dim); margin-top: 16px; text-align:center; }
+
+  .divider{
+    display:flex; align-items:center; gap: 14px; color: var(--text-dim);
+    font-size: 0.8rem; margin: 24px 0; text-transform: lowercase;
+  }
+  .divider::before, .divider::after{ content:''; flex:1; height:1px; background: var(--line); }
+
+  .login-btn{
+    width:100%; background: var(--violet); color:#fff; padding: 13px;
+    border-radius: 2px; font-family:'Rajdhani',sans-serif; font-weight:600;
+    font-size:1rem; cursor:pointer; border: none; margin-top: 6px;
+  }
+
+  .session-box{
+    display:flex; justify-content: space-between; align-items:center;
+    background: var(--panel); border: 1px solid var(--line);
+    padding: 16px 22px; font-size: 0.95rem;
+  }
+  .session-box .logout-link{ color: var(--text-dim); font-size: 0.85rem; }
+  .session-box .logout-link:hover{ color: var(--magenta); }
+
+  footer{
+    padding: 40px 6vw; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; color: var(--text-dim);
+    font-size: 0.85rem; flex-wrap: wrap; gap: 12px;
+  }
+  .x-link{
+    display:flex; align-items:center; gap: 8px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .x-link:hover{ color: var(--cyan); }
+
+  @media (max-width: 860px){
+    .steps{ grid-template-columns: 1fr; }
+    .pool-layout, .litvm-section{ grid-template-columns: 1fr; gap: 36px; }
+    .hero{ grid-template-columns: 1fr; }
+    .hero-visual{ order:-1; }
+    .participants-head, .participant-row{ grid-template-columns: 40px 1fr 110px; }
+    nav{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .glitch-word::before, .glitch-word::after{ animation: none; opacity:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay"></div>
+<div class="scanline"></div>
+
+<header>
+  <div class="logo"><img src="logo.png" alt="STUAN BEWO">STUAN BEWO</div>
+  <nav>
+    <a href="#how">How it works</a>
+    <a href="#pool">The pool</a>
+    <a href="#litvm">LitVM</a>
+    <a href="#partners">Partners</a>
+    <a href="#participants">Participants</a>
+    <a href="#register">Join</a>
+  </nav>
+  <button id="theme-toggle" aria-label="Toggle dark or light mode" title="Toggle dark / light mode">🌙</button>
+</header>
+
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">// A SOCIAL LOTTERY BUILT ON X</div>
+      <h1>Study a profile.<br>Post your <span class="glitch-word" data-text="take">take</span>.<br>Enter the pool.</h1>
+      <p>Pick an X account, post the best and the worst of its content, and you're in the draw. The pool is filled by project partners — you just bring the take.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">// THE POST REQUIREMENT</div>
+        <div class="prompt-text">"Study it, analyze it, and tell me the best and the worst."</div>
+        <div class="tags">
+          <span class="tag">#StuanBewo</span>
+          <span class="tag alt">#partnerusername</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <img src="logo.png" alt="STUAN BEWO — thumbs up or down">
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="section-head">
+      <h2>Three steps, nothing else</h2>
+      <span class="index">01 — 03</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="num">01</span>
+        <h3>Pick a profile</h3>
+        <p>Choose an active X account and go through its recent posts.</p>
+      </div>
+      <div class="step">
+        <span class="num">02</span>
+        <h3>Post the best and the worst</h3>
+        <p>Write a post with your honest take: one strength and one flaw of the profile you analyzed.</p>
+        <div class="tags">
+          <span class="tag">#StuanBewo</span>
+          <span class="tag alt">#partnerusername</span>
+        </div>
+      </div>
+      <div class="step">
+        <span class="num">03</span>
+        <h3>You're in the draw</h3>
+        <p>Your entry goes straight into the active pool. The draw does the rest.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pool" class="pool-section">
+    <div class="section-head">
+      <h2>How the pool pays out</h2>
+      <span class="index">EVERY 48H</span>
+    </div>
+    <div class="pool-layout">
+      <div class="pool-copy">
+        <p>The pool is funded by rewards from project partners. Every two days, 1% of the total pool is drawn among six winners, split unevenly.</p>
+        <p>Nobody deposits anything to enter — the only requirement is the analysis post.</p>
+        <div class="stat">
+          <div class="stat-block">
+            <div class="value">1%</div>
+            <div class="label">of the pool, every 48h</div>
+          </div>
+          <div class="stat-block">
+            <div class="value">6</div>
+            <div class="label">winners per draw</div>
+          </div>
+        </div>
+        <div class="prompt-box" style="margin-top:28px;">
+          <div class="prompt-label">// WHAT GETS DRAWN</div>
+          <div class="prompt-text">1% of the total pool, every 2 days</div>
+        </div>
+      </div>
+      <div class="payout-bars">
+        <div class="bar-row"><span class="rank">1st</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="pct">0.3%</span></div>
+        <div class="bar-row"><span class="rank">2nd</span><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><span class="pct">0.2%</span></div>
+        <div class="bar-row"><span class="rank">3rd</span><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><span class="pct">0.2%</span></div>
+        <div class="bar-row"><span class="rank">4th</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="pct">0.1%</span></div>
+        <div class="bar-row"><span class="rank">5th</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="pct">0.1%</span></div>
+        <div class="bar-row"><span class="rank">6th</span><div class="bar-track"><div class="bar-fill" style="width:33%"></div></div><span class="pct">0.1%</span></div>
+        <p class="pool-note">Bars are proportional to each share (0.3% to 0.1%), not to the size of the pool.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="litvm">
+    <div class="section-head">
+      <h2>Aligned with LitVM</h2>
+      <span class="index">GOVERNANCE</span>
+    </div>
+    <div class="litvm-section">
+      <div class="litvm-copy">
+        <p>Part of the pool doesn't just sit there: the community decides what percentage goes into yield strategies on LitVM.</p>
+        <p>Whatever that share earns flows back into the pool, so draws grow over time instead of relying only on new partners.</p>
+      </div>
+      <div class="litvm-panel">
+        <div class="row"><span>Pool source</span><span>Partner rewards</span></div>
+        <div class="row"><span>% in LitVM strategies</span><span>Community decision</span></div>
+        <div class="row"><span>Yield generated</span><span>Returns to the pool</span></div>
+        <div class="row"><span>Draw frequency</span><span>Every 48 hours</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="partners">
+    <div class="section-head">
+      <h2>Partners</h2>
+      <span class="index">FUNDING THE POOL</span>
+    </div>
+    <div class="partners-grid">
+      <div class="partner-slot open">Partner slot open</div>
+      <div class="partner-slot open">Partner slot open</div>
+      <div class="partner-slot open">Partner slot open</div>
+      <div class="partner-slot open">Partner slot open</div>
+    </div>
+  </section>
+
+  <section id="participants" class="pool-section">
+    <div class="section-head">
+      <h2>Participants</h2>
+      <span class="index">CURRENT ROUND</span>
+    </div>
+    <div class="participants-panel">
+      <div class="participants-head">
+        <span>#</span>
+        <span>X handle</span>
+        <span>Registered</span>
+      </div>
+      <div id="participants-body">
+        <div class="participants-empty">No entries yet for this round — be the first to post and show up here.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="register" class="register-section">
+    <h2>Join the platform</h2>
+    <p>Registration happens entirely inside the Telegram bot — no forms, no wallet needed.</p>
+    <div id="register-view" class="register-panel">
+      <a class="telegram-btn" href="http://t.me/StuanBewoBot" target="_blank" rel="noopener">Open the Telegram bot</a>
+      <p class="register-note">Send /start, solve a quick math check, then send your X username. The bot will also send you an access code — keep it like a password.</p>
+
+      <div class="divider">or log in</div>
+      <div class="field">
+        <label for="logincode">Your access code</label>
+        <input id="logincode" type="text" placeholder="Xk4mP9wZ" autocomplete="off" maxlength="8">
+      </div>
+      <button class="login-btn" id="login-submit" type="button">Log in</button>
+      <p id="login-status" class="register-note"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>STUAN BEWO — built on LitVM</span>
+  <span>Percentages and mechanics are subject to community adjustments</span>
+  <a class="x-link" href="https://x.com/StuanBewo" target="_blank" rel="noopener" aria-label="STUAN BEWO on X">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    @StuanBewo
+  </a>
+</footer>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+  });
+</script>
+
+<script>
+  fetch('/api/participants')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(list => {
+      if (!Array.isArray(list) || list.length === 0) return;
+      const body = document.getElementById('participants-body');
+      body.innerHTML = list.map((p, i) => `
+        <div class="participant-row">
+          <span>${i + 1}</span>
+          <span class="handle">@${p.handle}</span>
+          <span class="target">${new Date(p.registeredAt).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+    })
+    .catch(() => { /* keep the static empty state if the API isn't reachable */ });
+</script>
+
+<script>
+  const registerView = document.getElementById('register-view');
+  const loginInput = document.getElementById('logincode');
+  const loginBtn = document.getElementById('login-submit');
+  const loginStatus = document.getElementById('login-status');
+
+  function renderLoggedIn(handle) {
+    registerView.innerHTML = `
+      <div class="session-box">
+        <span>Logged in as <strong>@${handle}</strong></span>
+        <a href="#" class="logout-link" id="logout-link">Log out</a>
+      </div>
+    `;
+    document.getElementById('logout-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      window.location.reload();
+    });
+  }
+
+  fetch('/api/me', { credentials: 'include' })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(data => { if (data && data.handle) renderLoggedIn(data.handle); })
+    .catch(() => { /* not logged in, keep the register/login form */ });
+
+  loginBtn.addEventListener('click', async () => {
+    const code = loginInput.value.trim();
+    if (!code) return;
+    loginStatus.textContent = 'Checking...';
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        renderLoggedIn(data.handle);
+      } else {
+        loginStatus.textContent = data.error || 'That code is invalid or expired.';
+      }
+    } catch {
+      loginStatus.textContent = 'Something went wrong — try again.';
+    }
+  });
+</script>
+</body>
+</html>
