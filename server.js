@@ -10,6 +10,11 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'participants.json');
 
+// Render sets RENDER_EXTERNAL_URL automatically to the service's public URL.
+// On other hosts, set WEBHOOK_BASE_URL manually as an env var instead.
+const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL || process.env.WEBHOOK_BASE_URL;
+const WEBHOOK_PATH = '/bot-webhook';
+
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // browser session cookie: 30 days
 const CODE_LENGTH = 8;
 // no 0/O or 1/l/I — avoids characters people confuse when retyping
@@ -85,7 +90,21 @@ function newCaptcha(chatId) {
 }
 
 // ---------- bot ----------
-const bot = new TelegramBot(TOKEN, { polling: true });
+// webhook mode: Telegram pushes updates to us instead of us polling Telegram.
+// This lets the app run on hosts that sleep when idle (like Render's free tier) —
+// the incoming webhook request itself wakes the service back up.
+const bot = new TelegramBot(TOKEN, { webHook: { port: false } });
+
+if (PUBLIC_URL) {
+  const fullWebhookUrl = `${PUBLIC_URL.replace(/\/$/, '')}${WEBHOOK_PATH}`;
+  bot.setWebHook(fullWebhookUrl)
+    .then(() => console.log(`Webhook set to ${fullWebhookUrl}`))
+    .catch(err => console.error('Failed to set webhook:', err.message));
+} else {
+  console.warn(
+    'No RENDER_EXTERNAL_URL or WEBHOOK_BASE_URL set — the bot will not receive Telegram updates until the webhook is registered.'
+  );
+}
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -175,6 +194,11 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.post(WEBHOOK_PATH, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
 
 app.get('/api/participants', (req, res) => {
   const list = loadDB().map(p => ({ handle: p.handle, registeredAt: p.registeredAt }));
