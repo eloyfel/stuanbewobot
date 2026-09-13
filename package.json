@@ -1,0 +1,8 @@
+{
+  "name": "stuanbewo-bot",
+  "version": "2.0.0",
+  "description": "Telegram bot + web server for the STUAN BEWO social lottery (Vercel + MongoDB Atlas)",
+  "dependencies": {
+    "mongodb": "^6.9.0"
+  }
+}
