@@ -1,4 +1,4 @@
-# STUAN BEWO — bot + web
+# STUAN BEWO — bot + web !
 
 Registration happens entirely through a Telegram bot: solve a simple math
 check, send your X username, done. The bot also hands out an **access
