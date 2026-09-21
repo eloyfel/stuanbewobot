@@ -397,7 +397,7 @@
       <div class="step">
         <span class="num">03</span>
         <h3>You're in the draw</h3>
-        <p>Your entry goes straight into the active pool. The draw does the rest.</p>
+        <p>Send the link to the bot. Once your take is reviewed for quality, you're in the active pool. The draw does the rest.</p>
       </div>
     </div>
   </section>
@@ -410,7 +410,7 @@
     <div class="pool-layout">
       <div class="pool-copy">
         <p>The pool is funded by rewards from project partners. Every two days, 1% of the total pool is drawn among six winners, split unevenly.</p>
-        <p>Nobody deposits anything to enter — the only requirement is the analysis post.</p>
+        <p>Nobody deposits anything to enter. Entries are reviewed for quality, not counted by volume — one sharp take outweighs ten generic ones.</p>
         <div class="stat">
           <div class="stat-block">
             <div class="value">1%</div>
@@ -492,7 +492,7 @@
     <p>Registration happens entirely inside the Telegram bot — no forms, no wallet needed.</p>
     <div id="register-view" class="register-panel">
       <a class="telegram-btn" href="http://t.me/StuanBewoBot" target="_blank" rel="noopener">Open the Telegram bot</a>
-      <p class="register-note">Send /start, solve a quick math check, then send your X username. The bot will also send you an access code — keep it like a password.</p>
+      <p class="register-note">Send /start, solve a quick math check, then send your X username. The bot will also send you an access code — keep it like a password. When you post your take on a partner, send /submit with the link — entries are reviewed for quality before they count toward the pool.</p>
 
       <div class="divider">or log in</div>
       <div class="field">
@@ -508,83 +508,4 @@
 <footer>
   <span>STUAN BEWO — built on LitVM</span>
   <span>Percentages and mechanics are subject to community adjustments</span>
-  <a class="x-link" href="https://x.com/StuanBewo" target="_blank" rel="noopener" aria-label="STUAN BEWO on X">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-    @StuanBewo
-  </a>
-</footer>
-
-<script>
-  const themeToggle = document.getElementById('theme-toggle');
-  themeToggle.addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-mode');
-    themeToggle.textContent = isLight ? '☀️' : '🌙';
-  });
-</script>
-
-<script>
-  fetch('/api/participants')
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(list => {
-      if (!Array.isArray(list) || list.length === 0) return;
-      const body = document.getElementById('participants-body');
-      body.innerHTML = list.map((p, i) => `
-        <div class="participant-row">
-          <span>${i + 1}</span>
-          <span class="handle">@${p.handle}</span>
-          <span class="target">${new Date(p.registeredAt).toLocaleDateString()}</span>
-        </div>
-      `).join('');
-    })
-    .catch(() => { /* keep the static empty state if the API isn't reachable */ });
-</script>
-
-<script>
-  const registerView = document.getElementById('register-view');
-  const loginInput = document.getElementById('logincode');
-  const loginBtn = document.getElementById('login-submit');
-  const loginStatus = document.getElementById('login-status');
-
-  function renderLoggedIn(handle) {
-    registerView.innerHTML = `
-      <div class="session-box">
-        <span>Logged in as <strong>@${handle}</strong></span>
-        <a href="#" class="logout-link" id="logout-link">Log out</a>
-      </div>
-    `;
-    document.getElementById('logout-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-      window.location.reload();
-    });
-  }
-
-  fetch('/api/me', { credentials: 'include' })
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(data => { if (data && data.handle) renderLoggedIn(data.handle); })
-    .catch(() => { /* not logged in, keep the register/login form */ });
-
-  loginBtn.addEventListener('click', async () => {
-    const code = loginInput.value.trim();
-    if (!code) return;
-    loginStatus.textContent = 'Checking...';
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ code })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        renderLoggedIn(data.handle);
-      } else {
-        loginStatus.textContent = data.error || 'That code is invalid or expired.';
-      }
-    } catch {
-      loginStatus.textContent = 'Something went wrong — try again.';
-    }
-  });
-</script>
-</body>
-</html>
+  <a class="x-link" href="https://x.com/StuanB   
