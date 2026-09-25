@@ -15,6 +15,13 @@ function isAdmin(chatId) {
   return ADMIN_CHAT_ID && String(chatId) === String(ADMIN_CHAT_ID);
 }
 
+// Escapes the handful of characters legacy Telegram Markdown treats as
+// special, so a handle like "some_user" or "a*b" can't break formatting
+// or swallow the rest of the message.
+function escapeMarkdown(text) {
+  return String(text).replace(/([_*`[])/g, '\\$1');
+}
+
 function formatSubmission(sub) {
   return `New entry from @${sub.handle}\n${sub.url}\nSubmitted ${sub.submittedAt.toISOString()}`;
 }
@@ -50,7 +57,12 @@ async function handleMessage(message) {
   if (text === '/login') {
     if (flow && flow.handle) {
       const code = await upsertParticipant(flow.handle);
-      await sendMessage(chatId, `New access code for @${flow.handle}: ${code}\nThe old one stopped working.`);
+      await sendMessage(
+        chatId,
+        `New access code for @${escapeMarkdown(flow.handle)}:\n\`${code}\`\nTap it to copy. The old one stopped working.`,
+        null,
+        'Markdown'
+      );
     } else {
       await setBotFlow(chatId, { step: 'awaiting_username' });
       await sendMessage(chatId, `Send me your X (Twitter) username, e.g. @yourname`);
@@ -108,7 +120,9 @@ async function handleMessage(message) {
       await setBotFlow(chatId, { step: 'idle', handle });
       await sendMessage(
         chatId,
-        `You're registered as @${handle} 🎉 You'll show up on the site's participant list.\n\nYour access code: ${code}\nThis logs you into the site — keep it like a password. Send /login anytime to get a new one (the old one stops working).\n\nWhen you're ready to enter the pool, send /submit with a link to your post or comment about a partner.`
+        `You're registered as @${escapeMarkdown(handle)} 🎉 You'll show up on the site's participant list.\n\nYour access code:\n\`${code}\`\nTap it to copy — this logs you into the site, keep it like a password. Send /login anytime to get a new one (the old one stops working).\n\nWhen you're ready to enter the pool, send /submit with a link to your post or comment about a partner.`,
+        null,
+        'Markdown'
       );
     }
     return;
