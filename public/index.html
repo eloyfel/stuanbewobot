@@ -509,3 +509,100 @@
   <span>STUAN BEWO — built on LitVM</span>
   <span>Percentages and mechanics are subject to community adjustments</span>
   <a class="x-link" href="https://x.com/StuanB   
+<script>
+(function () {
+  const body = document.getElementById('participants-body');
+  const registerView = document.getElementById('register-view');
+  const codeInput = document.getElementById('logincode');
+  const loginBtn = document.getElementById('login-submit');
+  const statusEl = document.getElementById('login-status');
+
+  // ---------- Participants list ----------
+  async function loadParticipants() {
+    try {
+      const res = await fetch('/api/participantes');
+      const list = await res.json();
+
+      if (!Array.isArray(list) || list.length === 0) return; // keep the "no entries yet" placeholder
+
+      body.innerHTML = list
+        .map((p, i) => {
+          const date = p.registeredAt
+            ? new Date(p.registeredAt).toLocaleDateString()
+            : '—';
+          return `
+            <div class="participant-row">
+              <span>${i + 1}</span>
+              <span class="handle">@${escapeHtml(p.handle)}</span>
+              <span>${date}</span>
+            </div>`;
+        })
+        .join('');
+    } catch (err) {
+      console.error('Could not load participants:', err);
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+
+  // ---------- Session (login / logout) ----------
+  function renderLoggedIn(handle) {
+    registerView.innerHTML = `
+      <div class="session-box">
+        <span>Logged in as <strong>@${escapeHtml(handle)}</strong></span>
+        <a href="#" class="logout-link" id="logout-link">Log out</a>
+      </div>`;
+    document.getElementById('logout-link').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/api/cerrar-sesión', { method: 'POST' });
+      location.reload();
+    });
+  }
+
+  async function checkSession() {
+    try {
+      const res = await fetch('/api/yo');
+      if (res.ok) {
+        const data = await res.json();
+        renderLoggedIn(data.handle);
+      }
+    } catch (err) {
+      console.error('Session check failed:', err);
+    }
+  }
+
+  async function login() {
+    const code = (codeInput.value || '').trim();
+    if (!code) {
+      statusEl.textContent = 'Enter your access code first.';
+      return;
+    }
+    loginBtn.disabled = true;
+    statusEl.textContent = '';
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed.');
+      renderLoggedIn(data.handle);
+    } catch (err) {
+      statusEl.textContent = err.message;
+    } finally {
+      loginBtn.disabled = false;
+    }
+  }
+
+  loginBtn.addEventListener('click', login);
+  codeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+  loadParticipants();
+  checkSession();
+})();
+      </script>
