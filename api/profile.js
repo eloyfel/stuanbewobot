@@ -1,21 +1,12 @@
 // api/profile.js
 // POST /api/profile  { "code": "AB12CD34" }  ->  { profile: {...} }
 //
-// SUPUESTOS (ajusta si tu esquema es distinto):
-//  - Variable de entorno MONGODB_URI (con el nombre de la base en la URI)
-//  - Colección "participants"
-//  - Campos: accessCode, xUsername, createdAt, tickets (opcional)
+// Usa las funciones reales de lib/store.js: findParticipantByCode ya
+// compara el hash del código, y el esquema real es { handle, codeHash,
+// registeredAt } (sin xUsername/createdAt/tickets, que eran una suposición
+// incorrecta de la primera versión).
 
-const { MongoClient } = require('mongodb');
-
-let cachedClient = null;
-async function getDb() {
-  if (!cachedClient) {
-    cachedClient = new MongoClient(process.env.MONGODB_URI);
-    await cachedClient.connect();
-  }
-  return cachedClient.db(); // usa la base indicada en la URI
-}
+const { findParticipantByCode } = require('../lib/store');
 
 // Límite de intentos por IP (en memoria; sirve como freno básico en serverless)
 const attempts = new Map();
@@ -47,28 +38,23 @@ module.exports = async (req, res) => {
   }
 
   const raw = (req.body && req.body.code) || '';
-  const code = String(raw).trim().toUpperCase();
-  if (!/^[A-Z0-9]{8}$/.test(code)) {
-    return res.status(400).json({ error: 'El código debe tener 8 caracteres (letras y números).' });
+  const code = String(raw).trim();
+  if (!/^[a-zA-Z0-9]{8}$/.test(code)) {
+    return res.status(400).json({ error: 'El código debe tener 8 caracteres.' });
   }
 
   try {
-    const db = await getDb();
-    const user = await db.collection('participants').findOne(
-      { accessCode: code },
-      { projection: { _id: 0, xUsername: 1, createdAt: 1, tickets: 1 } }
-    );
+    const participant = await findParticipantByCode(code);
 
-    if (!user) {
+    if (!participant) {
       return res.status(404).json({ error: 'Código no encontrado. Revisa el que te dio el bot.' });
     }
 
-    // Nunca se devuelve accessCode ni chatId
+    // Nunca se devuelve codeHash ni chatId
     return res.status(200).json({
       profile: {
-        xUsername: user.xUsername,
-        createdAt: user.createdAt || null,
-        tickets: user.tickets || 0,
+        handle: participant.handle,
+        registeredAt: participant.registeredAt || null,
       },
     });
   } catch (err) {
