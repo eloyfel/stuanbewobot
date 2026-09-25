@@ -49,8 +49,7 @@
   input {
     width: 100%;
     font: 600 1.4rem 'Bricolage Grotesque', sans-serif;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
+    letter-spacing: 0.1em;
     text-align: center;
     padding: 12px;
     border: 1.5px solid var(--line);
@@ -95,7 +94,7 @@
     <h1>Entra a tu perfil</h1>
     <p>Pega el código de 8 caracteres que te dio el bot de Telegram.</p>
     <label for="code">Código de acceso</label>
-    <input id="code" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+    <input id="code" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
     <button id="enter">Entrar</button>
     <p id="msg" role="alert"></p>
   </section>
@@ -105,7 +104,6 @@
     <h2 id="p-user"></h2>
     <dl>
       <dt>Registrado el</dt><dd id="p-date"></dd>
-      <dt>Tickets de lotería</dt><dd id="p-tickets"></dd>
     </dl>
     <button id="logout" class="link">Salir</button>
   </section>
@@ -116,11 +114,10 @@
   const KEY = 'stuanbewo_code';
 
   function showProfile(p) {
-    $('p-user').textContent = '@' + String(p.xUsername).replace(/^@/, '');
-    $('p-date').textContent = p.createdAt
-      ? new Date(p.createdAt).toLocaleDateString('es')
+    $('p-user').textContent = '@' + String(p.handle).replace(/^@/, '');
+    $('p-date').textContent = p.registeredAt
+      ? new Date(p.registeredAt).toLocaleDateString('es')
       : '—';
-    $('p-tickets').textContent = p.tickets;
     $('login').hidden = true;
     $('profile').hidden = false;
   }
@@ -146,7 +143,7 @@
     }
   }
 
-  $('enter').addEventListener('click', () => login($('code').value.trim().toUpperCase()));
+  $('enter').addEventListener('click', () => login($('code').value.trim()));
   $('code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('enter').click(); });
   $('logout').addEventListener('click', () => {
     sessionStorage.removeItem(KEY);
@@ -160,7 +157,7 @@
   const saved = fromUrl || sessionStorage.getItem(KEY);
   if (saved) {
     if (fromUrl) history.replaceState(null, '', location.pathname); // quita el código de la URL
-    login(saved.toUpperCase());
+    login(saved);
   }
 </script>
 </body>
